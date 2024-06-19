@@ -1,0 +1,38 @@
+{
+  "format_version": 2,
+  "header": {
+      "description": "§9The Plugin Experience Now In Your Game! \n§2Made By Tendou",
+      "name": "§4GodMod",
+      "uuid": "496fea45-13bf-44de-8adb-5a572a0c988d",
+      "version": [ 0, 0, 1 ],
+      "min_engine_version": [ 1, 20, 81 ]
+  },
+  "modules": [
+      {
+          "type": "data",
+          "uuid": "7564a55b-add3-497b-9989-583c2607ea56",
+          "version": [0, 0, 1]
+      },
+      {
+      "language": "javascript",
+      "type": "script",
+      "uuid": "4f175311-db8a-4e50-8dab-bb2d0246929e",
+      "version": [0, 0, 1],
+      "entry": "index.js"
+    }
+  ],
+  "dependencies": [
+    {
+      "module_name": "@minecraft/server",
+      "version": "1.12.0-beta"
+    },
+  {
+    "module_name": "@minecraft/server-ui",
+    "version": "1.1.0"
+  },
+  {
+  "module_name": "@minecraft/common",
+  "version": "1.2.0"
+  }
+  ]
+}
