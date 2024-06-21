@@ -8,4 +8,3 @@ GodMod is essential plugin for Minecraft bedrock worlds, realms and dedicated se
 4 - Get on your hand compass, paper or blaze rod and right click for use.
 5 - This is enough
 
-# DON'T STEAL CODES WITHOUT PERMISSION!
