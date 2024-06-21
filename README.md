@@ -9,4 +9,3 @@ GodMod is essential plugin for Minecraft bedrock worlds, realms and dedicated se
 5 - This is enough
 
 # DON'T STEAL CODES WITHOUT PERMISSION!
-if you steal codes without my permission, i know to what i will do you.
