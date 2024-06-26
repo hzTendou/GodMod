@@ -1,6 +1,7 @@
-import { world, ItemStack,system, EntityComponentTypes, ItemLockMode, EquipmentSlot, BlockComponentTypes } from "@minecraft/server"
+import { world, ItemStack,system, EntityComponentTypes, ItemLockMode, EquipmentSlot, BlockComponentTypes, ItemTypes } from "@minecraft/server"
 import { ActionFormData, ModalFormData } from "@minecraft/server-ui"
 import { Vec3 } from "./utils/vec3.d.js";
+import "./plugins/area.js"
  import './classes/manager/EventEmitter.js'
  import './commands/import.js'
 //import "./plugins/crate.js"
@@ -50,7 +51,7 @@ function getEntitysItemName(entity) {
     const cmd = entity.runCommandAsync("testfor @s");
     return cmd.victim[0];
   } catch (error) {
-    return entity.getComponent("item").itemStack.typeId;
+    return entity.getComponent("item").itemStack.typeId.replace("minecraft:","")
   }
 }
 world.afterEvents.entitySpawn.subscribe(({ entity }) => {
@@ -65,6 +66,13 @@ function hasItem(player, item, amount, data = 0){
       return true
   } else {
     return false
+  }
+}
+function getDatabase() {
+  for(let entity of ow.getEntities()){
+      if(entity.typeId == "tgm:database"){
+          return entity;
+      }
   }
 }
 function getCScount(){
@@ -148,13 +156,6 @@ class tickTimeout {
   }
 }
 
-function getDatabase() {
-  for(let entity of ow.getEntities()){
-      if(entity.typeId == "tgm:database"){
-          return entity;
-      }
-  }
-}
 
 function getPlayers() {
   let players = world.getPlayers()
@@ -191,8 +192,17 @@ function getRank(player){
 system.runInterval(data => {
   for(let player of world.getPlayers()){
   if (player.hasTag("old")) return
-  ow.runCommandAsync(`replaceitem entity @a slot.hotbar 8 minecraft:compass 1 5 {"minecraft:item_lock":{"mode":"lock_in_inventory"}, "minecraft:keep_on_death":{}}`)  
-  ow.runCommandAsync(`replaceitem entity @a slot.hotbar 7 minecraft:paper 1 2322 {"minecraft:item_lock":{"mode":"lock_in_inventory"}, "minecraft:keep_on_death":{}}`)
+    let inv = player.getComponent("inventory").container
+    let item1 = new ItemStack("minecraft:compass", 1)
+    item1.keepOnDeath = true
+    item1.lockMode = ItemLockMode.slot
+    item1.nameTag = `§c§lTeleport Compass\n§f[Hold on/Right click]`
+    inv.setItem(8, item1)
+    let item2 = new ItemStack("minecraft:paper", 1)
+    item2.keepOnDeath = true
+    item2.lockMode = ItemLockMode.slot
+    item2.nameTag = `§c§lPlayer Menu\n§f[Hold on/Right click]`
+    inv.setItem(7, item2)
   player.addTag("old");
   }
 })
@@ -268,7 +278,7 @@ world.beforeEvents.playerInteractWithEntity.subscribe(data => {
 })
 world.afterEvents.itemUse.subscribe(data => {
   var playerc = data.source
-  if(data.itemStack.typeId == "minecraft:compass") {
+  if(data.itemStack.typeId == "minecraft:compass" && data.itemStack?.nameTag == `§c§lTeleport Compass\n§f[Hold on/Right click]`) {
     let compassmenu = new ActionFormData()
     .title(`§cTeleport Compass`)
     .button("§2Lobby\n§8[Click me]", "textures/items/compass_item.png")
@@ -365,7 +375,7 @@ world.afterEvents.itemUse.subscribe(data => {
   let playerd = data.source
 
   const { itemStack, source } = data
-  if (data.itemStack.typeId == "minecraft:paper") {
+  if (data.itemStack.typeId == "minecraft:paper" && data.itemStack?.nameTag == `§c§lPlayer Menu\n§f[Hold on/Right click]`) {
     var playermenu = new ActionFormData()
       .title("§cPlayer Menu")
       .body("§9What do you want to do?")
@@ -373,6 +383,7 @@ world.afterEvents.itemUse.subscribe(data => {
       .button(`§2Team\n§8[Click me]`, "textures/ui/FriendsIcon.png")
       .button("§2Home Settings\n§8[Click me]", "textures/ui/icon_recipe_item.png")
       .button("§2Money Transactions\n§8[Click me]", "textures/ui/icon_minecoin_9x9.png")
+      .button("§2Buy area\n§8[Click me]", "textures/ui/enable_editor.png")
       .button(`§2Admin Menu\n§8[Click me]`, "textures/ui/op.png")
 
     playermenu.show(playerd).then(res => {
@@ -580,7 +591,17 @@ world.afterEvents.itemUse.subscribe(data => {
     }
   })  
    }
-      if (res.selection == 4) {
+   if(res.selection == 4){
+    var areamenu = new ActionFormData()
+    .title("§cArea Buying Menu")
+    .body("§9Area price is calculating for per blok in selected area\nPrice for per block >> 100")
+    .button("Start the selection")
+    areamenu.show(playerd).then(res => {
+      playerd.sendMessage("§eSelection is starteds, right click for select")
+      playerd.addTag("dbJob:selection")
+    })
+   }
+      if (res.selection == 5) {
         if (playerd.hasTag("perm:Admin")) {
           var adminmenu = new ActionFormData()
             .title("§cAdmin Menu")
@@ -798,7 +819,7 @@ world.afterEvents.entityHitEntity.subscribe(data => {
 system.runInterval(() => {
   let db = getDatabase()
   for(let entity of world.getDimension("overworld").getEntities()){
-    if(entity.typeId == "tgm:slapper3" && entity.hasTag("slapper:blocks")){
+    if(entity.typeId == "tgm:slapper4" && entity.hasTag("slapper:blocks")){
       let shopinvcomp = entity.getComponent("inventory")
       let inv = shopinvcomp.container
       let blocks = [
@@ -843,7 +864,7 @@ system.runInterval(() => {
 system.runInterval(() => {
   let db = getDatabase()
   for(let entity of world.getDimension("overworld").getEntities()){
-    if(entity.typeId == "tgm:slapper3" && entity.hasTag("slapper:tools")){
+    if(entity.typeId == "tgm:slapper5" && entity.hasTag("slapper:tools")){
       let shopinvcomp = entity.getComponent("inventory")
       let inv = shopinvcomp.container
       let tools = [
@@ -889,7 +910,7 @@ system.runInterval(() => {
 system.runInterval(() => {
   let db = getDatabase()
   for(let entity of world.getDimension("overworld").getEntities()){
-    if(entity.typeId == "tgm:slapper3" && entity.hasTag("slapper:armor")){
+    if(entity.typeId == "tgm:slapper6" && entity.hasTag("slapper:armor")){
       let shopinvcomp = entity.getComponent("inventory")
       let inv = shopinvcomp.container
       let armor = [
@@ -1040,7 +1061,7 @@ system.runInterval(() => {
 system.runInterval(()=>{
   if(getCScount() == 0){
     for(let market of world.getDimension("overworld").getEntities()){
-      if(market.typeId == "tgm:chestuimarket"){
+      if(market.typeId == "tgm:slapper4" && market.hasTag("slapper:market")){
        let inv = market.getComponent(EntityComponentTypes.Inventory).container
        for(let x=0; inv.size > x; x++){
          inv.setItem(x)
@@ -1048,7 +1069,7 @@ system.runInterval(()=>{
      }}
    } else {
   for(let market of world.getDimension("overworld").getEntities()){
-   if(market.typeId == "tgm:slapper4"){
+   if(market.typeId == "tgm:slapper4" && market.hasTag("slapper:market")){
     let inv = market.getComponent(EntityComponentTypes.Inventory).container
     for(let x=0; getCScount() > x; x++){
       for(let tag of getDatabase().getTags()){
